@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700&display=swap');
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    height: 100%;
+    width: 100vw;
+    overflow: hidden;
+    margin: 0;
+}
+
+.container {
+    height: 90%;
+    width: 70vw;
+    border: 2px solid;
+    margin: 5% auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.element {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    z-index: -2;
+}
+
+.element.player {
+    bottom: 0;
+    height: 100px;
+    width: 100px;
+    object-fit: cover;
+}
+
+.element.good {
+    background-color: #32ad61;
+}
+
+.element.bad {
+    background-color: #e32636;
+}
+
+.points {
+    position: absolute;
+    right: 0;
+    border: 1px solid;
+    padding: 0 25px 10px 10px;
+    background-color: #fff;
+    z-index: -1;
+}
+
+.game-controller {
+    position: absolute;
+    border: 1px solid;
+    padding: 0 25px 10px 10px;
+    background-color: #fff;
+}
+
+.game-controller div {
+    cursor: pointer;
+}
