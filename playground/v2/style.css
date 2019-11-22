@@ -1,11 +1,16 @@
+body {
+    margin: 0;
+}
+
 #container {
-    height: 100%;
-    width: 100%;
+    height: 95vh;
+    width: 95vw;
     overflow: hidden;
     display: flex;
     flex-flow: column-reverse;
     justify-content: center;
     align-items: center;
+    padding: 8px;
 }
 
 #screen {
@@ -15,8 +20,8 @@
     image-rendering: -moz-crisp-edges;
     display: inline-block;
     vertical-align: top;
-    height: 80%;
-    width: 80%;
+    max-height: 80vh;
+    max-width: 75vw;
 }
 
 #controller {
@@ -26,7 +31,11 @@
 }
 
 #controller button {
-    width: 19vw;
-    font-size: 2vh;
+    font-size: 2.3vh;
+    font-weight: 700;
+    padding: 6px;
     margin-top: 1vw;
+    border: 2px solid #CCC;
+    border-radius: 35px;
+    outline: none;
 }

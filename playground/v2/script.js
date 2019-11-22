@@ -5,7 +5,7 @@ const screen = document.getElementById('screen'),
     context = screen.getContext('2d'),
     elementSize = 150,
     playerSize = 250,
-    characters = ["alien-1.svg", "alien.svg", "asian-1.svg", "asian-2.svg", "asian-3.svg", "asian.svg", "basketball-game.player.svg", "boxer.svg", "boy-1.svg", "boy-10.svg", "boy-11.svg", "boy-12.svg", "boy-2.svg", "boy-3.svg", "boy-4.svg", "boy-5.svg", "boy-6.svg", "boy-7.svg", "boy-8.svg", "boy-9.svg", "boy.svg", "businessman-1.svg", "businessman-2.svg", "businessman-3.svg", "businessman.svg", "characters.svg", "chef.svg", "chemist-1.svg", "chemist.svg", "chicken.svg", "child.svg", "cleaner.svg", "cool-1.svg", "cool.svg", "doctor.svg", "duck.svg", "farmer-1.svg", "farmer.svg", "freak.svg", "gardener.svg", "grandfather-1.svg", "grandfather.svg", "guitar-game.player-1.svg", "guitar-game.player.svg", "hipster.svg", "hitman-1.svg", "hitman-2.svg", "hitman-3.svg", "hitman-4.svg", "hitman.svg", "man-1.svg", "man-2.svg", "man-3.svg", "man-4.svg", "man-5.svg", "man-6.svg", "man.svg", "martial-arts.svg", "nerd-1.svg", "nerd.svg", "painter.svg", "plumber-1.svg", "plumber.svg", "policeman.svg", "priest.svg", "prisioner.svg", "professor.svg", "psycho-1.svg", "psycho-2.svg", "psycho.svg", "rapper.svg", "robot.svg", "smoker.svg", "student.svg", "superheroe-1.svg", "superheroe-10.svg", "superheroe-11.svg", "superheroe-12.svg", "superheroe-13.svg", "superheroe-14.svg", "superheroe-2.svg", "superheroe-3.svg", "superheroe-4.svg", "superheroe-5.svg", "superheroe-6.svg", "superheroe-7.svg", "superheroe-8.svg", "superheroe-9.svg", "superheroe.svg", "supervillain.svg", "supervillian.svg", "teacher.svg", "trumpeter.svg", "villian.svg", "warrior.svg", "wrestler.svg"],
+    characters = ["alien-1.svg", "alien.svg", "asian-1.svg", "asian-2.svg", "asian-3.svg", "asian.svg", "basketball-game.player.svg", "boxer.svg", "boy-1.svg", "boy-10.svg", "boy-11.svg", "boy-12.svg", "boy-2.svg", "boy-3.svg", "boy-4.svg", "boy-5.svg", "boy-6.svg", "boy-7.svg", "boy-8.svg", "boy-9.svg", "boy.svg", "businessman-1.svg", "businessman-2.svg", "businessman-3.svg", "businessman.svg", "characters.svg", "chef.svg", "chemist-1.svg", "chemist.svg", "chicken.svg", "child.svg", "cleaner.svg", "cool-1.svg", "cool.svg", "doctor.svg", "duck.svg", "farmer-1.svg", "farmer.svg", "freak.svg", "gardener.svg", "grandfather-1.svg", "grandfather.svg", "guitar-player-1.svg", "guitar-player.svg", "hipster.svg", "hitman-1.svg", "hitman-2.svg", "hitman-3.svg", "hitman-4.svg", "hitman.svg", "man-1.svg", "man-2.svg", "man-3.svg", "man-4.svg", "man-5.svg", "man-6.svg", "man.svg", "martial-arts.svg", "nerd-1.svg", "nerd.svg", "painter.svg", "plumber-1.svg", "plumber.svg", "policeman.svg", "priest.svg", "prisioner.svg", "professor.svg", "psycho-1.svg", "psycho-2.svg", "psycho.svg", "rapper.svg", "robot.svg", "smoker.svg", "student.svg", "superheroe-1.svg", "superheroe-10.svg", "superheroe-11.svg", "superheroe-12.svg", "superheroe-13.svg", "superheroe-14.svg", "superheroe-2.svg", "superheroe-3.svg", "superheroe-4.svg", "superheroe-5.svg", "superheroe-6.svg", "superheroe-7.svg", "superheroe-8.svg", "superheroe-9.svg", "superheroe.svg", "supervillain.svg", "supervillian.svg", "teacher.svg", "trumpeter.svg", "villian.svg", "warrior.svg", "wrestler.svg"],
     elements = {
         good: ['sun-umbrella.svg', 'sun.svg', 'sunscreen.svg'],
         bad: ['flame.svg']
@@ -73,11 +73,12 @@ class Game {
 
         let positionX
 
-        if (command.direction) {
+        if (command.touch) {
+            positionX = command.touch.start + (command.touch.end * (screen.width / screen.offsetWidth))
+        } else if (command.direction) {
             positionX = player.x + (command.direction === 'left' ? -(screen.width / 40) : (screen.width / 40))
         } else {
             positionX = command.positionX
-
             positionX = ((screen.width * (positionX)) / (screen.offsetWidth - 20)) - (playerSize / 2)
         }
 
@@ -279,16 +280,16 @@ const keyboardListener = createKeyboardListener()
 keyboardListener.subscribe(game.commands)
 
 function createKeyboardListener() {
-    const state = {
+    const stateListener = {
         observers: []
     }
 
     function subscribe(observerFunction) {
-        state.observers.push(observerFunction)
+        stateListener.observers.push(observerFunction)
     }
 
     function notifyAll(command) {
-        for (const observerFunction of state.observers) {
+        for (const observerFunction of stateListener.observers) {
             observerFunction(command)
         }
     }
@@ -315,16 +316,16 @@ const mouseListener = createMouseListener()
 mouseListener.subscribe(game.movePlayer)
 
 function createMouseListener() {
-    const state = {
+    const stateListener = {
         observers: []
     }
 
     function subscribe(observerFunction) {
-        state.observers.push(observerFunction)
+        stateListener.observers.push(observerFunction)
     }
 
     function notifyAll(command) {
-        for (const observerFunction of state.observers) {
+        for (const observerFunction of stateListener.observers) {
             observerFunction(command)
         }
     }
@@ -349,6 +350,66 @@ function createMouseListener() {
     }
 }
 
+const touchListener = createTouchListener()
+touchListener.subscribe(game.movePlayer)
+
+function createTouchListener() {
+    const stateListener = {
+        observers: []
+    }
+
+    let startTouch
+    let startPlayer
+
+    function subscribe(observerFunction) {
+        stateListener.observers.push(observerFunction)
+    }
+
+    function notifyAll(command) {
+        for (const observerFunction of stateListener.observers) {
+            observerFunction(command)
+        }
+    }
+
+    document.addEventListener('touchstart', handleTouchStart)
+    document.addEventListener('touchmove', handleTouchMove)
+
+    function handleTouchStart(e) {
+        startTouch = e.targetTouches[0].clientX
+        startPlayer = state.players['player1'].x
+    }
+
+    function handleTouchMove(e) {
+        // e.preventDefault()
+
+        const command = {
+            playerId: 'player1',
+            touch: {
+                start: startPlayer,
+                end: e.targetTouches[0].clientX - startTouch
+            }
+        }
+
+        notifyAll(command)
+    }
+
+    function handleMouseMove(e) {
+        if (is_touch_device())
+            return
+        const positionX = e.offsetX
+
+        const command = {
+            playerId: 'player1',
+            positionX
+        }
+
+        notifyAll(command)
+    }
+
+    return {
+        subscribe
+    }
+}
 // function startMove(ev) {
 //     game.startTouch = ev.targetTouches[0].clientX
 //     game.startPlayerMove = game.player.left
