@@ -1,0 +1,32 @@
+#container {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-flow: column-reverse;
+    justify-content: center;
+    align-items: center;
+}
+
+#screen {
+    border: 10px solid #CCC;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    image-rendering: -moz-crisp-edges;
+    display: inline-block;
+    vertical-align: top;
+    height: 80%;
+    width: 80%;
+}
+
+#controller {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 1vw;
+}
+
+#controller button {
+    width: 19vw;
+    font-size: 2vh;
+    margin-top: 1vw;
+}
