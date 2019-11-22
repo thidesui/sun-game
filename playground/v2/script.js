@@ -112,10 +112,6 @@ class Game {
         game.creatingElement = true
 
         const property = (Math.floor((Math.random() * 10) + 1) > 7) ? 'bad' : 'good'
-            // let iconPath
-            // if (property == 'good')
-            // 	iconPath = good[parseInt(Math.random() * good.length) + '']
-            // const icon = `../elements/${property}/${[property][parseInt(Math.random() * characters.length) + '']}`
 
         state.elements[generateGuid()] = {
             x: (screen.width - elementSize) * Math.random(),
@@ -202,18 +198,20 @@ class Game {
     }
 
     start() {
+        if (game.status === 'stopped') {
+            game.createPeriod = 4000
+            game.fallSpeed = 1
+            state.points = {
+                hits: 0,
+                mistakes: 0
+            }
+        }
         game.status = 'playing'
         buttons.pause.disabled = false
         buttons.start.disabled = true
         buttons.stop.disabled = false
-        game.createPeriod = 4000
-        game.fallSpeed = 1
-        game.fallElement()
         game.createElement(true, true)
-        state.points = {
-            hits: 0,
-            mistakes: 0
-        }
+        game.fallElement()
     }
 
     pause() {
