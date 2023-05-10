@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const screen = document.getElementById('screen'),
     container = document.getElementById('container'),
@@ -9,14 +9,14 @@ const screen = document.getElementById('screen'),
     elements = {
         good: ['sun-umbrella.svg', 'sun.svg', 'sunscreen.svg'],
         bad: ['flame.svg']
-    }
+    };
 
 const buttons = {
     start: document.getElementById('startGame'),
     pause: document.getElementById('pauseGame'),
     stop: document.getElementById('stopGame'),
     changeCharacter: document.getElementById('changeCharacter')
-}
+};
 
 const state = {
     players: {
@@ -29,416 +29,396 @@ const state = {
         hits: 0,
         mistakes: 0
     }
-}
+};
 
 class Game {
+    status = 'stopped';
 
-    status = 'stopped'
+    createPeriod = 4000;
 
-    createPeriod = 4000
+    fallSpeed = 1;
 
-    fallSpeed = 1
+    numberOfMistakes = 10;
 
-    numberOfMistakes = 10
-
-    creatingElement = false
+    creatingElement = false;
 
     commandsAccepted = {
         'p': (_) => {
             if (game.status == 'playing')
-                game.pause()
+                game.pause();
             else
-                game.start()
+                game.start();
         },
         'a': (command) => {
-            game.movePlayerWithKey(command, 'left')
+            game.movePlayerWithKey(command, 'left');
         },
         'd': (command) => {
-            game.movePlayerWithKey(command, 'right')
+            game.movePlayerWithKey(command, 'right');
         },
         'ArrowLeft': (command) => {
-            game.movePlayerWithKey(command, 'left')
+            game.movePlayerWithKey(command, 'left');
         },
         'ArrowRight': (command) => {
-            game.movePlayerWithKey(command, 'right')
+            game.movePlayerWithKey(command, 'right');
         }
-    }
+    };
 
     movePlayer(command) {
 
         if (game.status != 'playing')
-            return
+            return;
 
-        const player = state.players[command.playerId]
+        const player = state.players[command.playerId];
 
-        let positionX
+        let positionX;
 
         if (command.touch) {
-            positionX = command.touch.start + (command.touch.end * (screen.width / screen.offsetWidth))
+            positionX = command.touch.start + (command.touch.end * (screen.width / screen.offsetWidth));
         } else if (command.direction) {
-            positionX = player.x + (command.direction === 'left' ? -(screen.width / 40) : (screen.width / 40))
+            positionX = player.x + (command.direction === 'left' ? -(screen.width / 40) : (screen.width / 40));
         } else {
-            positionX = command.positionX
-            positionX = ((screen.width * (positionX)) / (screen.offsetWidth - 20)) - (playerSize / 2)
+            positionX = command.positionX;
+            positionX = ((screen.width * (positionX)) / (screen.offsetWidth - 20)) - (playerSize / 2);
         }
 
-        const max = screen.width - playerSize
+        const max = screen.width - playerSize;
 
         if (positionX < 0)
-            positionX = 0
+            positionX = 0;
 
         else if (positionX > max)
-            positionX = max
+            positionX = max;
 
-        player.x = positionX
+        player.x = positionX;
 
-        game.checkPlayersHits()
+        game.checkPlayersHits();
     }
 
     changeCharacter(playerId) {
-        state.players[playerId].character = `../characters/${characters[parseInt(Math.random() * characters.length) + '']}`
+        state.players[playerId].character = `./playground/characters/${characters[parseInt(Math.random() * characters.length) + '']}`;
     }
 
     createElement(repeat, start) {
-
         if (start && game.creatingElement === true)
-            return
+            return;
 
         if (game.status != 'playing') {
-            game.creatingElement = false
-            return
+            game.creatingElement = false;
+            return;
         }
 
-        game.creatingElement = true
+        game.creatingElement = true;
 
-        const property = (Math.floor((Math.random() * 10) + 1) > 7) ? 'bad' : 'good'
+        const property = (Math.floor((Math.random() * 10) + 1) > 7) ? 'bad' : 'good';
 
         state.elements[generateGuid()] = {
             x: (screen.width - elementSize) * Math.random(),
             y: 0,
-            property: property,
-            image: `../elements/${property}/${elements[property][parseInt(Math.random() * elements[property].length) + '']}`,
+            property,
+            image: `./playground/elements/${property}/${elements[property][parseInt(Math.random() * elements[property].length) + '']}`,
             fallSpeed: game.fallSpeed
-        }
+        };
 
         if (repeat)
-            awaitThis(game.createPeriod).then(() => { game.createElement(true) })
+            awaitThis(game.createPeriod).then(() => { game.createElement(true); });
     }
 
     fallElement() {
-
         if (game.status != 'playing')
-            return
+            return;
 
         for (const elementId in state.elements) {
-            const element = state.elements[elementId]
+            const element = state.elements[elementId];
 
-            element.y += element.fallSpeed
+            element.y += element.fallSpeed;
 
             if (element.y > screen.height - elementSize + 10) {
-                delete state.elements[elementId]
-                if (element.property == 'good')
-                    game.point('mistakes')
-                else
-                    game.point('hits')
+                if (element.property == 'good') game.point('mistakes');
+                else game.point('hits');
+
+                delete state.elements[elementId];
             }
         }
 
-        game.checkPlayersHits()
-        awaitThis(1).then(() => { game.fallElement() })
+        game.checkPlayersHits();
+        awaitThis(1).then(() => { game.fallElement(); });
     }
 
     checkPlayersHits() {
         for (const playerId in state.players) {
-            const player = state.players[playerId]
+            const player = state.players[playerId];
 
             for (const elementId in state.elements) {
-                const element = state.elements[elementId]
+                const element = state.elements[elementId];
 
-                const hitHeight = (element.y > screen.height - (playerSize * 1.6))
-                const hitWidth = (player.x < element.x + elementSize) && (element.x < player.x + playerSize)
+                const hitHeight = (element.y > screen.height - (playerSize * 1.6));
+                const hitWidth = (player.x < element.x + elementSize) && (element.x < player.x + playerSize);
 
                 if (hitHeight && hitWidth)
-                    game.hit(playerId, elementId)
+                    game.hit(playerId, elementId);
             }
         }
     }
 
-    hit(playerId, elementId) {
-        const element = state.elements[elementId]
-        delete state.elements[elementId]
+    hit(_playerId, elementId) {
+        const element = state.elements[elementId];
 
-        if (element.property === 'good')
-            game.point('hits')
-        else
-            game.point('mistakes')
+        if (element.property === 'good') game.point('hits');
+        else game.point('mistakes');
+
+        delete state.elements[elementId];
     }
 
     point(property) {
-        state.points[property]++
-            if (property === 'hits') {
-                if (game.createPeriod > 300)
-                    game.createPeriod -= 125
-                if ((state.points.hits % 5 == 0) && game.fallSpeed < 6)
-                    game.fallSpeed += 1
-            }
+        state.points[property]++;
+        if (property === 'hits') {
+            if (game.createPeriod > 300)
+                game.createPeriod -= 125;
+            if ((state.points.hits % 5 == 0) && game.fallSpeed < 6)
+                game.fallSpeed += 1;
+        }
         if (property === 'mistakes' && state.points.mistakes >= game.numberOfMistakes)
-            game.stop()
+            game.stop();
     }
 
     movePlayerWithKey(command, direction) {
-        game.movePlayer({ playerId: command.playerId, direction: direction })
+        game.movePlayer({ playerId: command.playerId, direction: direction });
     }
 
     commands(command) {
-        const keyPressed = command.keyPressed
-        const keyFunction = game.commandsAccepted[keyPressed]
+        const keyPressed = command.keyPressed;
+        const keyFunction = game.commandsAccepted[keyPressed];
         if (keyFunction)
-            keyFunction(command)
+            keyFunction(command);
     }
 
     start() {
         if (game.status === 'stopped') {
-            game.createPeriod = 4000
-            game.fallSpeed = 1
+            game.createPeriod = 4000;
+            game.fallSpeed = 1;
             state.points = {
                 hits: 0,
                 mistakes: 0
-            }
+            };
         }
-        game.status = 'playing'
-        buttons.pause.disabled = false
-        buttons.start.disabled = true
-        buttons.stop.disabled = false
-        game.createElement(true, true)
-        game.fallElement()
+        game.status = 'playing';
+        buttons.pause.disabled = false;
+        buttons.start.disabled = true;
+        buttons.stop.disabled = false;
+        game.createElement(true, true);
+        game.fallElement();
     }
 
     pause() {
-        game.status = 'paused'
-        buttons.pause.disabled = true
-        buttons.start.disabled = false
-        buttons.stop.disabled = false
+        game.status = 'paused';
+        buttons.pause.disabled = true;
+        buttons.start.disabled = false;
+        buttons.stop.disabled = false;
     }
 
     stop() {
-        game.status = 'stopped'
-        buttons.start.disabled = false
-        buttons.pause.disabled = true
-        buttons.stop.disabled = true
+        game.status = 'stopped';
+        buttons.start.disabled = false;
+        buttons.pause.disabled = true;
+        buttons.stop.disabled = true;
         for (const playerId in state.players) {
-            const player = state.players[playerId]
-            player.x = 0
+            const player = state.players[playerId];
+            player.x = 0;
         }
         for (const elementId in state.elements) {
-            delete state.elements[elementId]
+            delete state.elements[elementId];
         }
     }
 }
 
-let game = new Game()
-game.changeCharacter('player1')
+let game = new Game();
+game.changeCharacter('player1');
 
 function renderScreen() {
+    screen.width = (screen.height * container.offsetWidth) / container.offsetHeight;
 
-    screen.width = (screen.height * container.offsetWidth) / container.offsetHeight
-
-    context.fillStyle = 'white'
-    context.clearRect(0, 0, screen.width, screen.height)
+    context.fillStyle = 'white';
+    context.clearRect(0, 0, screen.width, screen.height);
 
     for (const playerId in state.players) {
-        const player = state.players[playerId]
-        let image = new Image()
-        image.src = player.character
+        const player = state.players[playerId];
+        let image = new Image();
+        image.src = player.character;
         context.drawImage(image, player.x, screen.height - playerSize, playerSize, playerSize);
     }
 
+    console.log(JSON.stringify(state, null, ' '));
     for (const elementId in state.elements) {
-        const element = state.elements[elementId]
-        let image = new Image()
-        image.src = element.image
+        const element = state.elements[elementId];
+        let image = new Image();
+        image.src = element.image;
         context.drawImage(image, element.x, element.y, elementSize, elementSize);
-        // context.fillStyle = (element.property === 'good' ? 'green' : 'red')
-        // context.fillRect(element.x, element.y, elementSize, elementSize)
     }
 
-    context.fillStyle = 'black'
+    context.fillStyle = 'black';
     context.font = "50px Arial";
     context.fillText(`Hits: ${state.points.hits}`, 10, 60);
-    context.fillText(`Mistakes: ${state.points.mistakes}`, 10, 120);
-    context.fillText(`Creation period: ${game.createPeriod}ms`, 10, 180);
-    context.fillText(`Fall speed: ${game.fallSpeed}px/ms`, 10, 240);
+    context.fillText(`Mistakes: ${state.points.mistakes} / 10`, 10, 120);
+    // context.fillText(`Creation period: ${game.createPeriod}ms`, 10, 180);
+    // context.fillText(`Fall speed: ${game.fallSpeed}px/ms`, 10, 240);
 
-    requestAnimationFrame(renderScreen)
+    requestAnimationFrame(renderScreen);
 }
 
-renderScreen()
+renderScreen();
 
-const keyboardListener = createKeyboardListener()
-keyboardListener.subscribe(game.commands)
+const keyboardListener = createKeyboardListener();
+keyboardListener.subscribe(game.commands);
 
 function createKeyboardListener() {
     const stateListener = {
         observers: []
-    }
+    };
 
     function subscribe(observerFunction) {
-        stateListener.observers.push(observerFunction)
+        stateListener.observers.push(observerFunction);
     }
 
     function notifyAll(command) {
         for (const observerFunction of stateListener.observers) {
-            observerFunction(command)
+            observerFunction(command);
         }
     }
 
-    document.addEventListener('keydown', handleKeydown)
+    document.addEventListener('keydown', handleKeydown);
 
     function handleKeydown(e) {
-        const keyPressed = e.key
+        const keyPressed = e.key;
 
         const command = {
             playerId: 'player1',
             keyPressed
-        }
+        };
 
-        notifyAll(command)
+        notifyAll(command);
     }
 
     return {
         subscribe
-    }
+    };
 }
 
-const mouseListener = createMouseListener()
-mouseListener.subscribe(game.movePlayer)
+const mouseListener = createMouseListener();
+mouseListener.subscribe(game.movePlayer);
 
 function createMouseListener() {
     const stateListener = {
         observers: []
-    }
+    };
 
     function subscribe(observerFunction) {
-        stateListener.observers.push(observerFunction)
+        stateListener.observers.push(observerFunction);
     }
 
     function notifyAll(command) {
         for (const observerFunction of stateListener.observers) {
-            observerFunction(command)
+            observerFunction(command);
         }
     }
 
-    screen.addEventListener('mousemove', handleMouseMove)
+    screen.addEventListener('mousemove', handleMouseMove);
 
     function handleMouseMove(e) {
         if (is_touch_device())
-            return
-        const positionX = e.offsetX
+            return;
+        const positionX = e.offsetX;
 
         const command = {
             playerId: 'player1',
             positionX
-        }
+        };
 
-        notifyAll(command)
+        notifyAll(command);
     }
 
     return {
         subscribe
-    }
+    };
 }
 
-const touchListener = createTouchListener()
-touchListener.subscribe(game.movePlayer)
+const touchListener = createTouchListener();
+touchListener.subscribe(game.movePlayer);
 
 function createTouchListener() {
     const stateListener = {
         observers: []
-    }
+    };
 
-    let startTouch
-    let startPlayer
+    let startTouch;
+    let startPlayer;
 
     function subscribe(observerFunction) {
-        stateListener.observers.push(observerFunction)
+        stateListener.observers.push(observerFunction);
     }
 
     function notifyAll(command) {
         for (const observerFunction of stateListener.observers) {
-            observerFunction(command)
+            observerFunction(command);
         }
     }
 
-    document.addEventListener('touchstart', handleTouchStart)
-    document.addEventListener('touchmove', handleTouchMove)
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchmove', handleTouchMove);
 
     function handleTouchStart(e) {
-        startTouch = e.targetTouches[0].clientX
-        startPlayer = state.players['player1'].x
+        startTouch = e.targetTouches[0].clientX;
+        startPlayer = state.players['player1'].x;
     }
 
     function handleTouchMove(e) {
-        // e.preventDefault()
-
         const command = {
             playerId: 'player1',
             touch: {
                 start: startPlayer,
                 end: e.targetTouches[0].clientX - startTouch
             }
-        }
+        };
 
-        notifyAll(command)
+        notifyAll(command);
     }
 
     function handleMouseMove(e) {
         if (is_touch_device())
-            return
-        const positionX = e.offsetX
+            return;
+        const positionX = e.offsetX;
 
         const command = {
             playerId: 'player1',
             positionX
-        }
+        };
 
-        notifyAll(command)
+        notifyAll(command);
     }
 
     return {
         subscribe
-    }
+    };
 }
-// function startMove(ev) {
-//     game.startTouch = ev.targetTouches[0].clientX
-//     game.startPlayerMove = game.player.left
-// }
-
-// function handleTouchMove(ev) {
-//     if (!game.on)
-//         return
-//     ev.preventDefault()
-//     game.player.moveTouch(game.startPlayerMove, ev.targetTouches[0].clientX - game.startTouch)
-// }
 
 function is_touch_device() {
     try {
-        document.createEvent("TouchEvent")
-        return true
+        document.createEvent("TouchEvent");
+        return true;
     } catch (e) {
-        return false
+        return false;
     }
 }
 
 function awaitThis(n) {
     return new Promise(resolve => {
         setTimeout(() => {
-            resolve()
-        }, n)
-    })
+            resolve();
+        }, n);
+    });
 }
 
 function generateGuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0,
             v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
