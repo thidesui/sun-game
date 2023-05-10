@@ -107,7 +107,7 @@ class Game {
 
         game.creatingElement = true;
 
-        const property = ((Math.random() * 10 | 0) > 5) ? 'bad' : 'good';
+        const property = ((Math.random() * 10 | 0) > 6) ? 'bad' : 'good';
 
         state.elements[generateGuid()] = {
             x: (canvas.width - elementSize) * Math.random(),
@@ -177,10 +177,10 @@ class Game {
     point(property: keyof State['points']) {
         state.points[property]++;
         if (property === 'hits') {
-            if (game.createPeriod > 300)
-                game.createPeriod -= 125;
-            if ((state.points.hits % 5 == 0) && game.fallSpeed < 6)
-                game.fallSpeed += 1;
+            if (game.createPeriod > 800)
+                game.createPeriod -= 230;
+            if (game.fallSpeed < 6)
+                game.fallSpeed += 0.2;
         }
         if (property === 'mistakes' && state.points.mistakes >= game.maxMistakes)
             game.stop();

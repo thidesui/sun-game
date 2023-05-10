@@ -1,1 +1,11 @@
-{ "compilerOptions": { "strict": true, "lib": ["ES2022", "DOM"] } }
+{
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["ES2022", "DOM"],
+    "target": "ES2022",
+    "module": "commonJS",
+    "outDir": "playground/v2"
+  },
+  "include": ["playground/typescript/script.ts"],
+  "exclude": ["playground/typescript/interfaces.ts"]
+}
