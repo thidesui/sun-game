@@ -1,3 +1,3 @@
 # sun-game
 
-https://sun-game.web.app/v2/
+https://sun-game.web.app/
